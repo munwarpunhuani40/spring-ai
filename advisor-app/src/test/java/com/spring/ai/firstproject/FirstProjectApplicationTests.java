@@ -1,0 +1,25 @@
+package com.spring.ai.firstproject;
+
+import com.spring.ai.firstproject.service.ChatService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class FirstProjectApplicationTests {
+
+	@Autowired
+	private ChatService chatService;
+
+	@Test
+	void contextLoads() {
+	}
+
+	@Test
+	void TestTemplateRender(){
+		System.out.println("Template Renderer");
+		var output = this.chatService.chatTemplate("abc");
+		System.out.println(output);
+	}
+
+}
