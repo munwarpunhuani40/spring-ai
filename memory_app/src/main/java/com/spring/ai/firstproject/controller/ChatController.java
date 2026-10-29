@@ -4,10 +4,7 @@ import com.spring.ai.firstproject.entity.Tut;
 import com.spring.ai.firstproject.service.ChatService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -29,10 +26,11 @@ public class ChatController {
 
     @GetMapping("/chat")
     public ResponseEntity<String> chat(
-            @RequestParam(value = "q", required = true) String q
+            @RequestParam(value = "q", required = true) String q,
+             @RequestHeader(value = "userId", required = true) String userId
     ){
 
-        return ResponseEntity.ok(chatService.chatTemplate(q));
+        return ResponseEntity.ok(chatService.chatTemplate(q,userId));
 
     }
 

@@ -1,7 +1,6 @@
 package com.spring.ai.firstproject.service;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -23,10 +22,10 @@ public class ChatServiceImpl implements ChatService{
        this.chatClient = chatClient;
     }
 
-    public String chatTemplate(String query){
+    public String chatTemplate(String query,String userId){
         return this.chatClient
                 .prompt()
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "default"))
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, userId))
 //                .advisors(new SimpleLoggerAdvisor())
                 .system(system ->
                         system.text(this.systemMessage))

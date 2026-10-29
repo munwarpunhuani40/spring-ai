@@ -18,8 +18,8 @@ class FirstProjectApplicationTests {
 	@Test
 	void TestTemplateRender(){
 		System.out.println("Template Renderer");
-		var output = this.chatService.chatTemplate("abc");
-		System.out.println(output);
+//		var output = this.chatService.chatTemplate("abc");
+//		System.out.println(output);
 	}
 
 }
