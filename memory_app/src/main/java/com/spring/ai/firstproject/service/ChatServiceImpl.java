@@ -2,6 +2,7 @@ package com.spring.ai.firstproject.service;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class ChatServiceImpl implements ChatService{
     public String chatTemplate(String query){
         return this.chatClient
                 .prompt()
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, "default"))
 //                .advisors(new SimpleLoggerAdvisor())
                 .system(system ->
                         system.text(this.systemMessage))
