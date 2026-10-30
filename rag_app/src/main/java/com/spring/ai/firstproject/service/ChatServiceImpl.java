@@ -3,6 +3,7 @@ package com.spring.ai.firstproject.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -36,23 +37,24 @@ public class ChatServiceImpl implements ChatService{
 
     public String chatTemplate(String query,String userId){
 //        load data from vector database
-        SearchRequest searchRequest = SearchRequest.builder()
-                .topK(3)
-                .similarityThreshold(0.6)
-                .query(query)
-                .build();
-        List<Document> documents = this.vectorStore.similaritySearch(searchRequest);
-
-        List<String> documentList = documents.stream().map(Document::getText).toList();
-        String contextData = String.join(", ", documentList);
-        logger.info("Context Data: {} ",contextData);
+//        SearchRequest searchRequest = SearchRequest.builder()
+//                .topK(3)
+//                .similarityThreshold(0.6)
+//                .query(query)
+//                .build();
+//        List<Document> documents = this.vectorStore.similaritySearch(searchRequest);
+//
+//        List<String> documentList = documents.stream().map(Document::getText).toList();
+//        String contextData = String.join(", ", documentList);
+//        logger.info("Context Data: {} ",contextData);
 
         return this.chatClient
                 .prompt()
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, userId))
 //                .advisors(new SimpleLoggerAdvisor())
-                .system(system ->
-                        system.text(this.systemMessage).param("documents",contextData))
+//                .system(system ->
+//                        system.text(this.systemMessage).param("documents",contextData))
+                .advisors(QuestionAnswerAdvisor.builder(vectorStore).searchRequest(SearchRequest.builder().topK(3).similarityThreshold(0.6).build()).build())
                 .user(user ->
                         user.text(userMessage).param("query",query))
                 .call()
