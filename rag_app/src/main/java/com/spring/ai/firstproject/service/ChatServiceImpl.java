@@ -1,21 +1,23 @@
 package com.spring.ai.firstproject.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
 public class ChatServiceImpl implements ChatService{
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ChatClient chatClient;
 
@@ -33,14 +35,26 @@ public class ChatServiceImpl implements ChatService{
     }
 
     public String chatTemplate(String query,String userId){
+//        load data from vector database
+        SearchRequest searchRequest = SearchRequest.builder()
+                .topK(3)
+                .similarityThreshold(0.6)
+                .query(query)
+                .build();
+        List<Document> documents = this.vectorStore.similaritySearch(searchRequest);
+
+        List<String> documentList = documents.stream().map(Document::getText).toList();
+        String contextData = String.join(", ", documentList);
+        logger.info("Context Data: {} ",contextData);
+
         return this.chatClient
                 .prompt()
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, userId))
 //                .advisors(new SimpleLoggerAdvisor())
                 .system(system ->
-                        system.text(this.systemMessage))
+                        system.text(this.systemMessage).param("documents",contextData))
                 .user(user ->
-                        user.text(userMessage).param("concept",query))
+                        user.text(userMessage).param("query",query))
                 .call()
                 .content();
     }
