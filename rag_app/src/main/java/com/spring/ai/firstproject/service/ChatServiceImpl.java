@@ -6,6 +6,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,9 @@ public class ChatServiceImpl implements ChatService{
     }
 
     public String chatTemplate(String query,String userId){
+
+//        Method 01: manual process
+
 //        load data from vector database
 //        SearchRequest searchRequest = SearchRequest.builder()
 //                .topK(3)
@@ -48,13 +53,35 @@ public class ChatServiceImpl implements ChatService{
 //        String contextData = String.join(", ", documentList);
 //        logger.info("Context Data: {} ",contextData);
 
+
+//        Method 02: done using QuestionAnswerAdvisor
+//        return this.chatClient
+//                .prompt()
+//                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, userId))
+////                .advisors(new SimpleLoggerAdvisor())
+////                .system(system ->
+////                        system.text(this.systemMessage).param("documents",contextData))
+//                .advisors(QuestionAnswerAdvisor.builder(vectorStore).searchRequest(SearchRequest.builder().topK(3).similarityThreshold(0.6).build()).build())
+//                .user(user ->
+//                        user.text(userMessage).param("query",query))
+//                .call()
+//                .content();
+
+//        Method 03: done by usingRetrievalAugmentationAdvisor
+
+        var advisor = RetrievalAugmentationAdvisor
+                .builder()
+                .documentRetriever(VectorStoreDocumentRetriever
+                        .builder()
+                        .vectorStore(this.vectorStore)
+                        .topK(3)
+                        .similarityThreshold(0.05)
+                        .build())
+                .build();
         return this.chatClient
                 .prompt()
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, userId))
-//                .advisors(new SimpleLoggerAdvisor())
-//                .system(system ->
-//                        system.text(this.systemMessage).param("documents",contextData))
-                .advisors(QuestionAnswerAdvisor.builder(vectorStore).searchRequest(SearchRequest.builder().topK(3).similarityThreshold(0.6).build()).build())
+                .advisors(advisor)
                 .user(user ->
                         user.text(userMessage).param("query",query))
                 .call()
